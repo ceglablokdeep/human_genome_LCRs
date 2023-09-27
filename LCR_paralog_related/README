@@ -1,7 +1,7 @@
 ####Checking whether paralogs give rise to the same LCR or different
 bedtools intersect -wa -wb -a flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact -b human_protein_coding_genes_coordinates > flps_output_with_gene_names
 awk '{print $9}' flps_output_with_gene_names|sort -u > genes_with_lps
-cp genes_with_lps_backup genes_with_lps
+cp genes_with_lps genes_with_lps_backup
 rm -rf para_temp paraflps shared_flps_output
 nummax=`wc -l genes_with_lps|awk '{print $1}'`
 for num in `seq 1 $nummax`
