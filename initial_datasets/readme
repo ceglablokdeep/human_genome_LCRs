@@ -29,3 +29,5 @@ awk '{print "chr"$0}' flps_detected_single_chronly_exon_repeats.txt > flps_detec
 
 
 ##I am keeping these output files here.
+
+##file ucsc_repeats.bed is not uploaded as it is 178MB.
