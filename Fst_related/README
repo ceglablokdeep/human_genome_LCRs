@@ -20,4 +20,4 @@ vcftools --vcf 1kGP_merged_chromosomes.vcf --weir-fst-pop "$pop1"_samples --weir
 done < pairwise_pops
 
 
-##We apologize for not being able to provide the weir.fst files due to their large size. However, the same can be generated from the above script.
+##We apologize for not being able to provide the weir.fst files, and the main input files for Fst comparison due to their large size. However, the same can be generated from the scripts provided.
