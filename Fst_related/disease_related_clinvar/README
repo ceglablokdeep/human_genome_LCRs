@@ -42,4 +42,4 @@ bedtools intersect -wa -wb -a clinvar_lcr_dbsnp_overlap -b human_protein_coding_
 awk '{print $14,$15,$16,$18,$19,$4,$11,$24,$20}' OFS="\t" clinvar_lcr_with_genenames > clinvar_lcr_with_genenames_arranged
 
 awk -F'\t' '/^#/{next} {split($9, fields, ";"); for (i in fields) {split(fields[i], keyVal, "="); if (keyVal[1] == "CLNDN" || keyVal[1] == "CLNSIG" || keyVal[1] == "CLNVC") {printf "%s\t", keyVal[1],keyVal[2]}} print $1"\t"$2-1"\t"$2"\t"$4"\t"$5"\t"$7"\t"$8}' clinvar_lcr_with_genenames_arranged|awk 'NF==10{print $4,$5,$6,$7,$8,$9,$10,$1,$2,$3}' OFS="\t" > clinvar_lcr_with_genenames_arranged_filtered
-cut -f6,7,8 clinvar_lcr_with_genenames_arranged_filtered|sort -u|grep -v "not_provided"|grep -v "not_specified"|grep -v "See_cases"|cut -f1 -d"|"|cut -f1 -d","|sort -u > 
+cut -f6,7,8 clinvar_lcr_with_genenames_arranged_filtered|sort -u|grep -v "not_provided"|grep -v "not_specified"|grep -v "See_cases"|cut -f1 -d"|"|cut -f1 -d","|sort -u > rpt_gene_disease_clinvar
