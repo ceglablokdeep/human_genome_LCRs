@@ -1,0 +1,8 @@
+###Making 10Mb non-overlapping windows to pick up cluster of hotspots detected earlier#######################
+bedtools makewindows -g chromosomesizes -w 10000000 > abcd
+sort -u abcd|sort -k1,1 -k2,2n > human_10mb_windows
+rm abcd
+bedtools intersect -c -a human_10mb_windows -b hotspots_repeats_50kb.txt|sort -k4nr|head
+###We define a cluster of hotspot if number of hotspots in the 10mb windows are more than 5####
+##We will use 10mb for further analyses
+bedtools intersect -c -a human_10mb_windows -b hotspots_repeats_50kb.txt|awk '$4>5{print $0}' OFS="\t" > coordinates_cluster_hotspot_10mb_windows
