@@ -1,0 +1,9 @@
+##1000 genome ftp
+
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X
+do
+echo $i
+wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/1kGP_high_coverage_Illumina.chr"$i".filtered.SNV_INDEL_SV_phased_panel.vcf.gz
+done
+
+##We really apologize for not being able to provide the VCF files due to their huge size. But the same files can be downloaded from the above ftp link in the for loop.
