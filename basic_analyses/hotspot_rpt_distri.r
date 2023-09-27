@@ -1,0 +1,5 @@
+a=read.table("hotspot_repeats_distribution",header=F)
+jpeg("hotspot_repeat_types_distribution.jpeg",width=28,height=18,units="in",res=300)
+barplot(a$V2,names=a$V1,main="Distribution of LCRs in hotspots in humans",xlab="LCRs",ylab="",border="dodgerblue4",col="dodgerblue3",ylim=c(0,800),cex.main=3.5,cex.axis=1.5,cex.names=1.5,cex.lab=1.8)
+title(ylab="Count",cex.lab=1.5,line=2.2)
+dev.off()

@@ -1,0 +1,7 @@
+library(ggplot2)
+a=read.table("normalized_dna_count.txt",header=F)
+b=aggregate(a$V3 ~ a$V1 + a$V2, data = a, FUN = sum, na.rm = TRUE)
+colnames(b)=c("aarpt","dnarpt","count")
+jpeg("repeat_types_contribution_proportion.jpeg",width=14,height=9,units="in",res=300)
+ggplot(b, aes(fill=dnarpt, y=count, x=aarpt))+ labs(fill = "DNA repeats")+ labs(x = "Amino acid LCRs",y = "Proportion",colour = "DNA repeats") + geom_bar(position="fill", stat="identity") + ggtitle(label = "Relative contribution of DNA repeats in amino acid repeats") + theme_classic()
+dev.off()

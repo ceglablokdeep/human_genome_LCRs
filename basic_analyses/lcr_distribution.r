@@ -1,0 +1,5 @@
+a=read.table("flps_detected_rpt_count",header=F)
+jpeg("protein_repeat_distribution_human.jpeg",width=28,height=18,units="in",res=300)
+barplot(a$V2,names=a$V1,main="Distribution of protein LCRs in humans",xlab="Protein LCRs",ylab="",border="orchid4",col="orchid3",ylim=c(0,1400),cex.main=3.5,cex.axis=2,cex.names=2,cex.lab=2)
+title(ylab="Count",cex.lab=2,line=1.5)
+dev.off()

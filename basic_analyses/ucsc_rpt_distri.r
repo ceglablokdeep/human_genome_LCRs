@@ -1,0 +1,5 @@
+a=read.table("ucsc_repeat_type_distribution",header=F)
+jpeg("repeats_distribution_exons_human.jpeg",width=28,height=18,units="in",res=300)
+barplot(a$V2,names=a$V1,main="Distribution of LCRs in exons in humans",xlab="LCRs",ylab="",border="dodgerblue4",col="dodgerblue3",ylim=c(0,60000),cex.main=3.5,cex.axis=1.5,cex.names=1.5,cex.lab=1.8)
+title(ylab="Count",cex.lab=1.5,line=2.2)
+dev.off()
