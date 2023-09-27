@@ -1,0 +1,45 @@
+wget https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151_GRCh38p7/BED/bed_chr_1.bed.gz
+sed '1d' bed_chr_1.bed |sort -k1,1 -k2,2n > chr1_dbsnp_sorted
+bedtools intersect -wa -a chr1_dbsnp_sorted -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact > flps_chr1_snps
+###now for the remaining chromosomes
+for i in `seq 2 22`
+do
+echo $i
+wget https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151_GRCh38p7/BED/bed_chr_"$i".bed.gz
+gunzip bed_chr_"$i".bed.gz; sed '1d' bed_chr_"$i".bed |sort -k1,1 -k2,2n > chr"$i"_dbsnp_sorted
+bedtools intersect -wa -a chr"$i"_dbsnp_sorted -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact > flps_chr"$i"_snps
+awk '{print $0,$3-$2}' OFS="\t" flps_chr"$i"_snps|awk '$7>1{print $0}' >> dbsnp_flps_length_polymorphism
+done
+
+###making the same files as above but with LCR overlap and lcr type information also; and this time we are selecting the regions where LCR and SNP have more than one nucleotide overlap
+rm -rf dbsnp_flps_length_polymorphism_lcr_overlap
+for i in `seq 1 22`
+do
+echo $i
+bedtools intersect -wo -a chr"$i"_dbsnp_sorted -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact > flps_chr"$i"_snps_lcr_overlap
+awk '{print $0,$3-$2}' OFS="\t" flps_chr"$i"_snps_lcr_overlap|awk '$12>1{print $0}' >> dbsnp_flps_length_polymorphism_lcr_overlap
+done
+###clinvar dataset
+wget https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar.vcf.gz
+grep -v "#" clinvar.vcf |awk 'NF==8{print $1,$2-1,$2,$3,$4,$5,$8}' OFS="\t"|sort -k1,1 -k2,2n > clinvar.bed
+sed 's/chr//g' flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact > flps.bed
+awk '$1<22{print $0}' clinvar.bed > clinvar_chr.bed
+sed -i 's/chr//g' human_chr_fasta.fa.fai
+awk '{print $1,$5}' OFS="\t" human_chr_fasta.fa.fai > human.txt
+bedtools intersect -wa -a clinvar.bed -b exon_coordinates > clinvar_exon.bed
+sort -V flps.bed|awk '$1!~/M/{print $0}' OFS="\t" > flps_sorted.bed
+sort -V clinvar_exon.bed > clinvar_exon_sort.bed
+bedtools fisher -a flps_sorted.bed -b clinvar_exon_sort.bed -g human.txt
+###Clinical SNPs are significantly favored in LCRs
+
+####Now intersecting the output "dbsnp_flps_length_polymorphism_lcr_overlap" and "clinvar_exon_sort.bed" to get the regions of LCR with clinically important SNPs
+awk '{print "chr"$0}' OFS="\t" clinvar_exon_sort.bed > clinvar_exon__withchr_sort.bed
+bedtools intersect -wa -a dbsnp_flps_length_polymorphism_lcr_overlap -b clinvar_exon__withchr_sort.bed > clinvar_lcr_dbsnp_overlap
+bedtools intersect -wa -wb -a clinvar_lcr_dbsnp_overlap -b human_protein_coding_genes_coordinates
+###I downloaded the list of paralog genes from Ensembl
+sed '1d' paralogous_genes_ensembl.txt |awk 'NF==2{print $0}' > paralog_list_filtered
+bedtools intersect -wa -wb -a clinvar_lcr_dbsnp_overlap -b human_protein_coding_genes_coordinates > clinvar_lcr_with_genenames
+awk '{print $14,$15,$16,$18,$19,$4,$11,$24,$20}' OFS="\t" clinvar_lcr_with_genenames > clinvar_lcr_with_genenames_arranged
+
+awk -F'\t' '/^#/{next} {split($9, fields, ";"); for (i in fields) {split(fields[i], keyVal, "="); if (keyVal[1] == "CLNDN" || keyVal[1] == "CLNSIG" || keyVal[1] == "CLNVC") {printf "%s\t", keyVal[1],keyVal[2]}} print $1"\t"$2-1"\t"$2"\t"$4"\t"$5"\t"$7"\t"$8}' clinvar_lcr_with_genenames_arranged|awk 'NF==10{print $4,$5,$6,$7,$8,$9,$10,$1,$2,$3}' OFS="\t" > clinvar_lcr_with_genenames_arranged_filtered
+cut -f6,7,8 clinvar_lcr_with_genenames_arranged_filtered|sort -u|grep -v "not_provided"|grep -v "not_specified"|grep -v "See_cases"|cut -f1 -d"|"|cut -f1 -d","|sort -u > rpt_gene_disease_clinvar
