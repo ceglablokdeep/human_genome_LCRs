@@ -71,8 +71,6 @@ bedtools nuc -fi human_chr_fasta.fa -bed human_50kb_windows|sed '1d'|cut -f1-3,5
 
 ####checking the fraction of exons in 50kb windows####
 
-##This is previous comman which was faulty: grep "^chr" gencode.v42.chr_patch_hapl_scaff.annotation.gtf|grep -v "pseudo"|grep "ENST"|grep "protein_coding"|awk '$3=="exon"{print $0}'|sed -e 's/"//g' -e 's/;//g'|awk '{if($5>$4)print $1,$4,$5;else if($4>$5)print $1,$5,$4}' OFS="\t"|sort -k1,1 -k2,2n|bedtools merge -i stdin > exon_coordinates
-
 grep "^chr" gencode.v42.chr_patch_hapl_scaff.annotation.gtf|awk '$3=="exon"{print $0}'|grep -v "pseudo"|grep "ENST"|sed -e 's/"//g' -e 's/;/\t/g'|awk '{print $1,$4,$5,$14,$16}' OFS="\t"|awk '$4!~/RNA/{print $0}'|grep -v "artifact"|grep -v "ribozyme"|grep -v "TEC"|awk '{if($3>$2)print $1,$2,$3,$4,$5;else if($2>$3)print $1,$3,$2,$4,$5}' OFS="\t"|sort -k1,1 -k2,2n|bedtools merge -c 4,5 -o distinct,distinct -i stdin > exon_coordinates
 
 ##235634 exon_coordinates
