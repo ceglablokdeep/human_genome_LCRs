@@ -1,0 +1,13 @@
+This directory contains the exploratory plots, their scripts, and their input data to look at the distributions of DNA repeats, LCRs, and their overlap and contribution.
+
+awk '{print $5}' flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact|sort|uniq -c|awk '{print $2,$1}' OFS="\t"|sort -k2nr > flps_detected_rpt_count
+bedtools intersect -wa -wb -a exon_coordinates -b ucsc_repeats.bed|awk '{print $6,$7,$8,$9,$10}' OFS="\t" > ucsc_exonic_repeats.bed
+##109817 ucsc_exonic_repeats.bed
+awk '{print $5}' ucsc_exonic_repeats.bed|awk -F, '{print $1}'|sort|uniq -c|grep -v "?"|awk '{print $2,$1}' OFS="\t"|sort -k2nr > ucsc_repeat_type_distribution
+
+##looking at the distribution of repeat types in the hotspot regions###
+bedtools intersect -wa -wb -a hotspots_repeats_50kb.txt -b ucsc_exonic_repeats.bed|awk '{print $10}'|awk -F, '{print $1}'|sort|grep -v "?"|uniq -c|awk '{print $2,$1}' OFS="\t"|sort -k2nr > hotspot_repeats_distribution
+
+##calculating which DNA repeat type contribute how much in protein repeats
+bedtools intersect -wao -a flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact -b ucsc_exonic_repeats.bed|awk '$11>0{print $5,$10,$11}' OFS="\t" > flps_ucsc_bp_overlap
+##3793 flps_ucsc_bp_overlap
