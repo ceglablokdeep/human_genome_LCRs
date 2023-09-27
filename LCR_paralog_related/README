@@ -29,3 +29,20 @@ echo -e "$j\t$allpara\t$numpara\t$tot_rpt\t$shared_rpt\t$frac" >> shared_flps_ou
 done
 
 awk 'NF>3{print $0}' OFS="\t" shared_flps_output|awk '{if(NF==5)print $1,"NO_PARA",$2,$3,$4,$5;else print $0}' OFS="\t" shared_flps_output|awk '{if(NF==4)print $1,$2,$3,$4,0,0;else print $0}' OFS="\t"|awk 'NF==6{print $0}' OFS="\t" > shared_flps_paralogs_filtered
+
+##I want to check if the hotspots are mainly comprised of paralogs and shared repeats
+rm -rf hotspot_genes_lps
+while read j
+do
+echo $j
+grep "$j" shared_flps_paralogs_filtered >> hotspot_genes_lps
+done < hotspot_genes
+sort -u hotspot_genes_lps > temp
+mv temp hotspot_genes_lps
+####now making the file without hotspot genes
+cp shared_flps_paralogs_filtered lps_paralog_without_hostpot_genes
+while read j
+do
+echo $j
+sed -i "/$j/d" lps_paralog_without_hostpot_genes
+done < hotspot_genes
