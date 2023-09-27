@@ -1,1 +1,6 @@
 This directory contains data and scripts to generate initial and final Karyoplot to highlight regions of LCR hotspots, clusters of LCR hotspots, and GC% and exon count in the regions.
+
+
+##NOTE: We need to intersect exon counts in 50Kb windows with hotspots repeats in 50Kb windows to get the input file. I am providing the final input file for the figure so it is not necessary to run it.
+##Intersecting the exon count bed file with hotspot bedfile to get the exon count in the hotspot regions
+bedtools intersect -a exon_counts_50kb_window -b hotspots_repeats_50kb.txt > hotspot_exon_count
