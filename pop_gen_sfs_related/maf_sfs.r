@@ -1,0 +1,7 @@
+a=read.table("maf_aa_rpt",header=F)
+b=read.table("maf_non_aa_rpt",header=F)
+jpeg("folded_sfs_aa_rpt_nonrpt.jpeg",width=20,height=18,units="in",res=300)
+par(mfrow=c(2,1))
+hist(a$V2,breaks=9,ylim=c(0,12000),main="Folded site frequency spectrum of amino acid LCR containing exons",xlab="Minor allele frequency",ylab="Number of sites",col="dodgerblue3")
+hist(b$V2,breaks=9,ylim=c(0,2000000),main="Folded site frequency spectrum of exons without amino acid LCRs",xlab="Minor allele frequency",ylab="Number of sites",col="dodgerblue3")
+dev.off()
