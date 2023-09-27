@@ -1,0 +1,12 @@
+Start: allowing 0 mismatches
+reading FASTA: gencode.v42.pc_translations.fa
+Fasta done: 110980 proteins read.
+building KmerMap...
+KmerMap done: 1891794 unique 5-mers created.
+reading GTF: gencode.v42.chr_patch_hapl_scaff.annotation.gtf
+GTF done!
+Computing genomic coordinates for: 
+input_pogo.txt
+Results done! (input_pogo.txt)
+writing output files
+done, cleaning up...
