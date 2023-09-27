@@ -28,4 +28,4 @@ awk '{print "chr"$0}' flps_detected_single_chronly_exon_repeats.txt > flps_detec
 ##11060 flps_detected_single_chronly_exon_repeats_chr.txt
 
 
-##I am keeping these initial files in this directory
+##I am keeping these output files here.
