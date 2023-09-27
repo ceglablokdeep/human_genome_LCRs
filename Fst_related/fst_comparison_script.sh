@@ -2,7 +2,6 @@ sed -i 's/chr//g' flps_detected_single_chronly_exon_repeats_chr_rpts_combined_co
 
 
 ##10 10337 0.00129976
-##cd /media/workstation/sde3/lokdeep/human_genetics/1000genomes/fst_files/fst_lcr
 for  i in `ls *weir_fst.weir.fst_filtered`
 do
 echo $i
