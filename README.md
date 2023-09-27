@@ -1,2 +1,2 @@
 # human_genome_LCRs
-Low-complexity regions in the human genome
+Patterns of low-complexity regions in human genes
