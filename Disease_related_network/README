@@ -1,0 +1,6 @@
+cat rpt_gene_disease_clinvar|sed -E 's/_[0-9]+//g'|awk '{print $1,$2,toupper($3)}' > disease_file_filtered
+awk '{print $1,$3}' disease_file_filtered|sort|uniq -c|awk '{print $1,$2,$3}'|sort -k1nr|awk '{print $2,$3,$1}' OFS="\t" > rpt_and_disease_count
+awk '$3>1{print $0}' OFS="\t" rpt_and_disease_count > rpt_diseases_more_than_one
+###some diseases names are manually edited and shortened
+##since now, some disorder names can be same, we add column3 if column1 and column2 are exactly same
+awk '{ sum[$1"\t"$2] += $3 } END { for (key in sum) print key, sum[key] }' rpt_diseases_more_than_one > rpt_diseases_more_than_one_new
