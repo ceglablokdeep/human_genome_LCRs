@@ -6,3 +6,29 @@ bedtools intersect -c -a human_10mb_windows -b hotspots_repeats_50kb.txt|sort -k
 ###We define a cluster of hotspot if number of hotspots in the 10mb windows are more than 5####
 ##We will use 10mb for further analyses
 bedtools intersect -c -a human_10mb_windows -b hotspots_repeats_50kb.txt|awk '$4>5{print $0}' OFS="\t" > coordinates_cluster_hotspot_10mb_windows
+
+
+###For Chromosome 17 image
+
+bedtools intersect -a hotspots_repeats_50kb.txt -b coordinates_cluster_hotspot_10mb_windows > hotspots_coordinates_within_clusters
+##60 hotspots_coordinates_within_clusters
+###intersecting with the gene id file to get the gene id of repeat-containing genes in the cluster
+bedtools intersect -wa -wb -a hotspots_coordinates_within_clusters -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact|awk '{print $6,$7,$8,$9,$10}' OFS="\t" > genes_in_cluster_hotspot
+##252
+bedtools intersect -wa -wb -a genes_in_cluster_hotspot -b exon_coordinates > genes_names_in_cluster_hotspot
+awk '{print $10}' genes_names_in_cluster_hotspot|sort -u|wc -l
+##73 unique genes
+
+####Zooming on the cluster of Chromosome 17 to get a detailed picture in the region
+##since genes_names_in_cluster_hotspot has only one cluster in chromosome 17, we can directly extract it
+awk '{print $6,$7,$8,$9,$5}' genes_names_in_cluster_hotspot OFS="\t"|sort -u|grep "^chr17"|awk '{print $1,$2,$3,$4}' OFS="\t"|sort -u > ch17_cluster_exons
+bedtools intersect -wa -a human_protein_coding_genes_coordinates -b ch17_cluster_exons|sort -u > ch17_cluster_genes
+###extracting the exons of the genes in the same region
+###The above genes fall in the window: chr17	40000000	50000000
+echo -e "chr17\t40000000\t50000000" > ch17hswindow
+##getting the coordinates of the exons
+bedtools intersect -a ch17hswindow -b exon_coordinates > ch17window_exons
+###getting the coordinates of the repeats
+bedtools intersect -a ch17hswindow -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact > ch17_clus_repeats
+###getting the GC% of the same region
+bedtools intersect -wb -a ch17hswindow -b human_50kb_gc_per|awk '{print $4,$5,$6,$7}' OFS="\t" > ch17_clus_gc
