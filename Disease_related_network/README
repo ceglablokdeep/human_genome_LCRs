@@ -4,3 +4,151 @@ awk '$3>1{print $0}' OFS="\t" rpt_and_disease_count > rpt_diseases_more_than_one
 ###some diseases names are manually edited and shortened
 ##since now, some disorder names can be same, we add column3 if column1 and column2 are exactly same
 awk '{ sum[$1"\t"$2] += $3 } END { for (key in sum) print key, sum[key] }' rpt_diseases_more_than_one > rpt_diseases_more_than_one_new
+
+###Downloading protein network data from string db
+
+###selecting only the experimentally validated protein interaction
+wget https://stringdb-static.org/download/protein.links.detailed.v11.5/9606.protein.links.detailed.v11.5.txt.gz
+gunzip 9606.protein.links.detailed.v11.5.txt.gz
+awk '$7>0{print $1"\t"$2}' OFS="\t" 9606.protein.links.detailed.v11.5.txt > experimental_protein.txt
+sed -i 's/9606.ENSP/ENSP/g' experimental_protein.txt
+##refining biomart file
+mv mart_export.txt gene_name_protein_id.txt
+awk 'NF==2{print $0}' OFS="\t" gene_name_protein_id.txt > gene_protein_refined.txt
+rm -rf rpt_gene_ids
+for g in `awk '{print $2}' rpt_gene_disease_clinvar|sort -u`
+do
+echo $g
+awk -v g=$g '$1==g{print $0}' OFS="\t" gene_protein_refined.txt >> rpt_gene_ids
+done
+
+awk 'NR==FNR{a[$2]=$1; next} {for(i=1;i<=NF;i++) if($i in a) $i=a[$i]} 1' OFS="\t" rpt_gene_ids experimental_protein.txt|grep -v ENSP > experimental_gene_names.txt
+#########making the network of genes containing LCRs and causing common disorders#########
+sort -u disease_file_filtered|awk '{print $1,$2,$3}' OFS="\t" > disease_file_unique
+#########################################################
+rm -rf new_network
+while read j
+do
+echo $j
+g1=`echo $j|awk '{print $1}'`
+g2=`echo $j|awk '{print $2}'`
+awk -v g1=$g1 '$2==g1{print $2"\t"$3}' disease_file_unique|sort -u > g1d
+awk -v g2=$g2 '$2==g2{print $2"\t"$3}' disease_file_unique|sort -u > g2d
+cat g1d g2d|awk '{print $2}'|sort|uniq -c|awk '$1>1{print $2}' > common_diseases
+num=`wc -l common_diseases|awk '{print $1}'`
+if [ $num -gt 0 ]
+then
+while read dis
+do
+echo -e "$g1\t$g2\t$dis" >> new_network
+done < common_diseases
+else
+echo -e "$g1\t$g2" >> new_network
+fi
+done < experimental_gene_names.txt
+rm common_diseases g2d g1d
+##please make backup of this file as it takes a lot of time to make
+cp new_network new_network_backup
+####removing the duplicated interactions
+rm -rf new_filtered_interaction
+maxnum=`wc -l new_network|awk '{print $1}'`
+for i in `seq 1 $maxnum`
+do
+inter=`head -n1 new_network`
+echo $inter
+numcol=`echo $inter|awk '{print NF}'`
+if [ $numcol -eq 2 ]
+then
+g1=`echo $inter|awk '{print $1}'`
+g2=`echo $inter|awk '{print $2}'`
+echo -e "$g1\t$g2" >> new_filtered_interaction
+while :
+do
+dupnum=`awk -v g1=$g1 -v g2=$g2 '$2==g1 && $1==g2{print NR}' new_network|wc -l|awk '{print $1}'`
+if [ $dupnum -eq 0 ]
+then
+break
+else
+one=`awk -v g1=$g1 -v g2=$g2 '$2==g1 && $1==g2{print NR}' new_network|head -n1`
+sed -i "${one}d" new_network
+fi
+done
+else
+g1=`echo $inter|awk '{print $1}'`
+g2=`echo $inter|awk '{print $2}'`
+dis=`echo $inter|awk '{print $3}'`
+echo -e "$g1\t$g2\t$dis" >> new_filtered_interaction
+while :
+do
+dupnum=`awk -v g1=$g1 -v g2=$g2 -v d=$dis '$2==g1 && $1==g2 && $3==d{print NR}' new_network|wc -l|awk '{print $1}'`
+if [ $dupnum -eq 0 ]
+then
+break
+else
+one=`awk -v g1=$g1 -v g2=$g2 -v d=$dis '$2==g1 && $1==g2 && $3==d{print NR}' new_network|head -n1`
+sed -i "${one}d" new_network
+fi
+done
+fi
+sed -i '1d' new_network
+done
+
+awk 'NF>1{print $0}' OFS="\t" new_filtered_interaction > temp
+mv temp new_filtered_interaction
+
+#######
+rm -rf paralogs_numbered all_disease_genes temp
+maxnum=`awk '{print $2}' disease_file_unique|sort -u|wc -l`
+awk '{print $2}' disease_file_unique|sort -u > all_disease_genes
+for i in `seq 1 $maxnum`
+do
+g=`head -n1 all_disease_genes|awk '{print $1}'`
+echo $g
+awk -v g1=$g '$2==g1{print $1}' paralog_list_filtered|sort -u > temp
+echo "$g" >> temp
+tmpsize=`wc -l temp|awk '{print $1}'`
+if [ $tmpsize -gt 1 ]
+then
+cmsize=`cat temp all_disease_genes|sort |uniq -c|awk -v i=$i '$1==2{print $2}'|wc -l|awk '{print $1}'`
+if [ $cmsize -gt 1 ]
+then
+cat temp all_disease_genes|sort|uniq -c|awk -v i=$i '$1==2{print $2,i}' OFS="\t" >> paralogs_numbered 
+fi
+else
+echo -e "$g\t0" >> paralogs_numbered
+fi
+while read j
+do
+sed -i "/\b$j\b/d" all_disease_genes
+done < temp
+done
+
+rm temp all_disease_genes
+awk 'NF==2{print $0}' OFS="\t" paralogs_numbered > temp
+mv temp paralogs_numbered
+##################################
+###assigning the paralog number to the disease file in a new file
+##save the below script as assign_number.awk
+# Read file2.txt and store the numeric values in the array gene_values
+NR == FNR {
+  gene_values[$1] = $2
+  next
+}
+
+# Process file1.txt
+{
+  # Check if the gene name exists in gene_values array
+  if ($2 in gene_values) {
+    # Assign the numeric value from gene_values to the new column
+    $0 = $0 OFS gene_values[$2]
+  } else {
+    # Assign 0 if the gene name does not exist
+    $0 = $0 OFS 0
+  }
+  
+  # Print the updated line
+  print
+}
+###########################
+awk -f assign_numeric.awk paralogs_numbered disease_file_unique > disease_file_unique_paralog_numbered.txt
+sed -i 's/ /\t/g' disease_file_unique_paralog_numbered.txt
