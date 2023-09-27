@@ -26,3 +26,6 @@ awk '{print $6,$7,$8,$11,$12}' OFS="\t" repeats_ucsc_grch38|sed '1d'|sort -k1,1 
 ##ucsc_repeats.bed contains both exonic and non-geneic repeats
 awk '{print "chr"$0}' flps_detected_single_chronly_exon_repeats.txt > flps_detected_single_chronly_exon_repeats_chr.txt
 ##11060 flps_detected_single_chronly_exon_repeats_chr.txt
+
+
+##I am keeping these initial files in this directory
