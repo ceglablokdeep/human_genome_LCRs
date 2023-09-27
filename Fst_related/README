@@ -18,3 +18,6 @@ pop1=`echo $j|awk '{print $1}'`
 pop2=`echo $j|awk '{print $2}'`
 vcftools --vcf 1kGP_merged_chromosomes.vcf --weir-fst-pop "$pop1"_samples --weir-fst-pop "$pop2"_samples --out "$pop1"_"$pop2"_weir_fst
 done < pairwise_pops
+
+
+##We apologize for not being able to provide the weir.fst files due to their large size. However, the same can be generated from the above script.
