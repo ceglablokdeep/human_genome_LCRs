@@ -11,3 +11,5 @@ bedtools intersect -a ch17hswindow -b exon_coordinates > ch17window_exons
 bedtools intersect -a ch17hswindow -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact > ch17_clus_repeats
 ###getting the GC% of the same region
 bedtools intersect -wb -a ch17hswindow -b human_50kb_gc_per|awk '{print $4,$5,$6,$7}' OFS="\t" > ch17_clus_gc
+
+##since the initial script of ch17 cluster does not give a clear image of the plot, we have made a zoomed in view of the same in the final script after subsetting the coordinates for better visualization. However, both scripts are provided for transparency.
