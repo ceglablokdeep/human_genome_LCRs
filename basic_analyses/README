@@ -11,3 +11,5 @@ bedtools intersect -wa -wb -a hotspots_repeats_50kb.txt -b ucsc_exonic_repeats.b
 ##calculating which DNA repeat type contribute how much in protein repeats
 bedtools intersect -wao -a flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact -b ucsc_exonic_repeats.bed|awk '$11>0{print $5,$10,$11}' OFS="\t" > flps_ucsc_bp_overlap
 ##3793 flps_ucsc_bp_overlap
+#############Now doing it for all the DNA repeats and aa repeats
+bedtools intersect -wa -wb -a ucsc_exonic_repeats.bed -b flps_detected_single_chronly_exon_repeats_chr_rpts_combined_compact|awk '{print $5}'|awk -F, '{print $1}'|sort|uniq -c|awk '{print $2,$1}' OFS="\t" > dna_rpt_distribution_aa_rpts
