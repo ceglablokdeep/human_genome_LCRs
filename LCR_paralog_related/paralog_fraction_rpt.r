@@ -1,0 +1,12 @@
+a=read.table("shared_flps_paralogs_filtered")
+library(hexbin)
+b=a[,c(3,6)]
+colnames(b)=c("x","y")
+library(RColorBrewer)
+rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
+r <- rf(32)
+jpeg('number_of_paralogs_and_fraction_of_repeats_human.jpeg',width=28,height=18,units="in",res=300)
+h <- hexbin(b,xlab="Number of paralogs",ylab="Fraction of shared LCRs")
+plot(h,colramp=rf)
+dev.off()
+cor.test(b$x,b$y,method="kendall")
