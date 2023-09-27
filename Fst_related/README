@@ -1,0 +1,20 @@
+##This directory is mainly to generate the pairwise Fst plot
+
+###I downloaded the population level data from https://www.internationalgenome.org/data-portal/data-collection/30x-grch38
+##It is a tab-separated file 'igsr-1000 genomes 30x on grch38.tsv.tsv'
+cut -f1,6 igsr-1000_genomes_30x_on_grch38.tsv.tsv |sed '1d'|awk 'length($2)<4{print $0}' > population_sample_id
+##3201: one sampe has two population codes "EUR,AFR" so it is dropped from the analyses
+for pops in AFR AMR EAS EUR SAS
+do
+grep "$pops" population_sample_id|awk '{print $1}' > "$pops"_samples
+done
+###highest samples are in AFR (893) while lowest in AMR (490)
+####Pairwise Fst between populations#####
+##file pairwise_pops contains all the pairwise combinations of the populations i.e. 10 combinations
+while read j
+do
+echo $j
+pop1=`echo $j|awk '{print $1}'`
+pop2=`echo $j|awk '{print $2}'`
+vcftools --vcf 1kGP_merged_chromosomes.vcf --weir-fst-pop "$pop1"_samples --weir-fst-pop "$pop2"_samples --out "$pop1"_"$pop2"_weir_fst
+done < pairwise_pops
