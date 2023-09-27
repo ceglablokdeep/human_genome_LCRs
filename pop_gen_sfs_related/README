@@ -7,3 +7,12 @@ wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_
 done
 
 ##We really apologize for not being able to provide the VCF files due to their huge size. But the same files can be downloaded from the above ftp link in the for loop.
+
+###After downloading the VCF files:
+
+##############concatenating all the chromosome vcf files
+vcf-concat 1kGP_high_coverage_Illumina.chr*filtered.SNV_INDEL_SV_phased_panel.vcf > 1kGP_merged_chromosomes.vcf
+vcftools --vcf 1kGP_merged_chromosomes.vcf --bed aa_repeat_containing_exons --freq --out aa_rpt_analysis --remove-indels
+vcftools --vcf 1kGP_merged_chromosomes.vcf --bed non_aa_repeat_containing_exons --freq --out non_aa_rpt_analysis --remove-indels
+sed '1d' aa_rpt_analysis.frq|awk '{print $5,$6}' OFS="\t"|sed 's/:/\t/g'|awk '{if($4<$2)print $3,$4;else print $1,$2;}' OFS="\t" > maf_aa_rpt
+sed '1d' non_aa_rpt_analysis.frq|awk '{print $5,$6}' OFS="\t"|sed 's/:/\t/g'|awk '{if($4<$2)print $3,$4;else print $1,$2;}' OFS="\t" > maf_non_aa_rpt
