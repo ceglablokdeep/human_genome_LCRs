@@ -1,0 +1,5 @@
+a=read.table("dna_rpt_distribution_aa_rpts",header=F)
+jpeg("dna_rpt_distribution_aa_rpts.jpeg",width=28,height=18,units="in",res=300)
+barplot(a$V2,names=a$V1,main="Distribution of DNA repeats in amino acid LCRs in humans",xlab="DNA Repeats",ylab="",border="dodgerblue4",col="dodgerblue3",ylim=c(0,max(a$V2)+500),cex.main=3.5,cex.axis=1.5,cex.names=1.5,cex.lab=1.8)
+title(ylab="Count",cex.lab=1.5,line=2.2)
+dev.off()
